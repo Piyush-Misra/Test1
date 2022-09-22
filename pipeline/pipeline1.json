@@ -71,6 +71,23 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Set variable4",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "If Condition1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "aaVar1",
+					"value": "'eeee'"
+				}
 			}
 		],
 		"variables": {
