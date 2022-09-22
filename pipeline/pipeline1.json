@@ -11,6 +11,37 @@
 					"variableName": "aaVar1",
 					"value": "bbbb"
 				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(\nvariables('aaVar1'),\n'aaaa'\n)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Set variable2",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "aaVar1",
+								"value": "'cccc'"
+							}
+						}
+					]
+				}
 			}
 		],
 		"variables": {
