@@ -29,6 +29,18 @@
 						"value": "@equals(\nvariables('aaVar1'),\n'aaaa'\n)",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "Set variable3",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "aaVar1",
+								"value": "'dddd'"
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
 							"name": "Set variable2",
@@ -59,8 +71,31 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Set variable4",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "If Condition1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "aaVar1",
+					"value": "'eeee'"
+				}
 			}
 		],
+		"parameters": {
+			"bbParam": {
+				"type": "string",
+				"defaultValue": "'parameter bb'"
+			}
+		},
 		"variables": {
 			"aaVar1": {
 				"type": "String",
