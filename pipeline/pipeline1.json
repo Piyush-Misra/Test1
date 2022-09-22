@@ -88,6 +88,23 @@
 					"variableName": "aaVar1",
 					"value": "'tttt'"
 				}
+			},
+			{
+				"name": "Set variable4_copy1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set variable4",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "aaVar1",
+					"value": "'tttt'"
+				}
 			}
 		],
 		"parameters": {
