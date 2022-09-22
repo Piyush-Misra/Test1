@@ -39,6 +39,23 @@
 								"variableName": "aaVar1",
 								"value": "'cccc'"
 							}
+						},
+						{
+							"name": "added Set variable3",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set variable2",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "aaVar1",
+								"value": "'cccc'"
+							}
 						}
 					]
 				}
