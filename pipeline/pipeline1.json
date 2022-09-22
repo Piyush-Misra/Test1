@@ -110,7 +110,7 @@
 		"parameters": {
 			"bbParam": {
 				"type": "string",
-				"defaultValue": "'parameter bb'"
+				"defaultValue": "'parameter bbgg'"
 			}
 		},
 		"variables": {
