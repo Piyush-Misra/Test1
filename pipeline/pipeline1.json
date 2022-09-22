@@ -90,6 +90,12 @@
 				}
 			}
 		],
+		"parameters": {
+			"bbParam": {
+				"type": "string",
+				"defaultValue": "'parameter bb'"
+			}
+		},
 		"variables": {
 			"aaVar1": {
 				"type": "String",
