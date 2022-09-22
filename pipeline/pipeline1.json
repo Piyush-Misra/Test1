@@ -13,7 +13,7 @@
 				}
 			},
 			{
-				"name": "If Condition1",
+				"name": "If Condition11",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -39,23 +39,6 @@
 								"variableName": "aaVar1",
 								"value": "'cccc'"
 							}
-						},
-						{
-							"name": "added Set variable3",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "Set variable2",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "aaVar1",
-								"value": "'cccc'"
-							}
 						}
 					]
 				}
@@ -67,6 +50,8 @@
 				"defaultValue": "aaaa"
 			}
 		},
-		"annotations": []
-	}
+		"annotations": [],
+		"lastPublishTime": "2022-09-22T23:48:05Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

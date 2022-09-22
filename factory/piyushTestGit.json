@@ -1,0 +1,9 @@
+{
+	"name": "piyushTestGit",
+	"location": "australiaeast",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "cc730904-c26c-4b50-9961-0d63a6b0dbd5",
+		"tenantId": "984befea-c12e-454e-9111-7b8d8da5e7e1"
+	}
+}
