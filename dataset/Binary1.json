@@ -10,7 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "hilltop",
+				"fileName": "aaInput.xlsx",
+				"folderPath": "piyush-testing",
 				"container": "raw"
 			}
 		}
