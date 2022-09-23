@@ -1,0 +1,56 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+   branches:
+    include:
+    - dev
+    - test
+    - prod
+   paths:
+    include:
+    - /infrastructure_ADF_manual_development
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  publishArtifact: in(variables['Build.SourceBranchName'], 'dev', 'test', 'prod')
+  # This is the Azure connection that is specific for the environment. Some tasks to not have subscription Ids :/
+  target-resource-group: 'waterdata-acquisition-dev-rg'
+  # This is the Azure connection that has access to all environments. Some tasks to have subscription Ids :)
+  azure-resource-manager-connection: 'AzureDevOps-Water Data' # This is the connection for all subscriptions
+  #product-name: 'waterdata-dev-df-123'
+  #environment: 'dev'
+steps:
+
+# Copy our infrastructure files into ArtifactStagingDirectory
+- task: CopyFiles@2
+  displayName: 'Copy infrastructure files to Artifact Staging Directory'
+  condition: and(succeeded(), variables['publishArtifact'])
+  inputs:
+    SourceFolder: '$(Build.Repository.LocalPath)\infrastructure_ADF_manual_development\'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\infrastructure_ADF_manual_development\'
+
+# Upload $(Build.ArtifactStagingDirectory) as a build artifact
+- task: PublishBuildArtifacts@1
+  displayName: Publish Build Artifacts
+  condition: and(succeeded(), variables['publishArtifact'])
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'artifact'
+    
+# Provision Resources within Resource Group
+#- task: AzureResourceManagerTemplateDeployment@3
+#  displayName: 'Provision Resources'
+#  inputs:
+#    azureResourceManagerConnection: '$(azure-resource-manager-connection)'
+#    subscriptionId: 'fa0024af-d176-438f-b916-8011abbead52'
+#    resourceGroupName: '$(target-resource-group)'
+#    location: '$(deployment-location)'
+#    csmFile: '$(Build.Repository.LocalPath)\Infrastructure\linkedTemplates\ArmTemplate_master.json'
+#    csmParametersFile: '$(Build.Repository.LocalPath)\Infrastructure\linkedTemplates\ArmTemplateParameters_master.json'
+#    #overrideParameters: '-environment $(Build.SourceBranchName) -product-name $(product-name)'

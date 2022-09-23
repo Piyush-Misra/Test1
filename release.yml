@@ -1,0 +1,137 @@
+# this is being defined in app-ci pipeline
+resources:
+  pipelines:
+  - pipeline: Acquisition
+    source: ManualADFBuild
+    trigger:
+      branches:
+      - dev
+      - test
+      - prod
+
+# Exclude CI from the repository because we only want to use the resource trigger above
+trigger:
+  branches:
+    exclude:
+      - '*'
+# We do not want pull requests to trigger the release
+pr:
+  branches:
+    exclude:
+      - '*'
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  target-resource-group: 'WaterData-acquisition-$(Build.SourceBranchName)-rg' # waterdata-acquisition-dev-rg
+  # This is the Azure connection that has access to all environments. Some tasks to have subscription Ids :)
+  azure-resource-manager-connection: 'AzureDevOps-Water Data' # This is the connection for all subscriptions
+  shared-key-vault: 'WaterData-Shared-$(Build.SourceBranchName)-kv'
+
+stages:
+- stage: ProvisionAndDeploy
+  jobs:
+  - job: ProvisionResources
+    displayName: Provision And Deploy Resources
+    steps:
+
+    # Get values from key vault
+    # The purpose of this task is to get all keys from the environment's shared key vault and use these to populate the product's key vault
+    # Note that the deployment-project secret value is used in further steps
+    - task: AzureKeyVault@1
+      inputs:
+        azureSubscription: '$(azure-resource-manager-connection)'
+        KeyVaultName: '$(shared-key-vault)'
+        SecretsFilter: '*'
+        RunAsPreJob: true
+
+    # We should now have access to these variables that have been populated from the shared Key Vault
+    #
+    # deployment-project
+    # deployment-location
+    # deployment-subscription-Id
+
+    # Output all environment variables for debugging purposes
+    - task: PowerShell@2
+      displayName: 'Display all environment variables'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "deployment-project - $DEPLOYMENT_PROJECT"
+
+          Write-Host "List all environment variables"
+
+          gci env:
+
+    # Download the finished artifact from the build pipeline
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'specific'
+        project: '$(deployment-project)'
+        pipeline: 'ManualADFBuild'
+        specificBuildWithTriggering: true
+        buildVersionToDownload: 'latest'
+        downloadType: 'specific'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: CmdLine@2
+      displayName: 'List directories for debugging'
+      inputs:
+        script: |
+          echo List the root dir
+          dir
+
+          echo Change to $(System.ArtifactsDirectory)
+          cd $(System.ArtifactsDirectory)
+
+          echo $(System.ArtifactsDirectory)
+          dir
+
+          echo artifact contents
+          cd artifact
+          dir
+
+          echo Infrastructure contents
+          cd Infrastructure
+          dir
+
+
+    # Provision Resources within Resource Group
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: 'Provision Resources'
+      condition: eq(variables['Build.SourceBranchName'], 'dev')
+      inputs:
+        azureResourceManagerConnection: '$(azure-resource-manager-connection)'
+        subscriptionId: '$(deployment-subscription-Id)'
+        resourceGroupName: '$(target-resource-group)'
+        location: '$(deployment-location)'
+        csmFile: '$(Build.Repository.LocalPath)\infrastructure_ADF_manual_development\arm_template.json'
+        csmParametersFile: '$(Build.Repository.LocalPath)\infrastructure_ADF_manual_development\arm_template_parameters.json'
+        overrideParameters: '-ConnectVIA_IR shared-dev-df01 -factoryName waterdata-manual-dev-df -properties_typeProperties_linkedInfo_resourceId /subscriptions/fa0024af-d176-438f-b916-8011abbead52/resourcegroups/shared-acquisition-dev-rg/providers/Microsoft.DataFactory/factories/shared-dev-df01/integrationruntimes/shared-dev-iR01 -FileServer_properties_typeProperties_host \\hilltopTest02\Data\WaterQualityData\replication -FileServer_properties_typeProperties_userId SVC-Waterdata-az-df@internal.ecan.govt.nz -AzureBlobStorage_properties_typeProperties_connectionString_secretName ADFManualQuality-Landing-Live-Link-XML-JSON -waterdatadatafactorykv_properties_typeProperties_baseUrl https://waterdata-datafactory-kv.vault.azure.net/ -FileServer_wa_properties_typeProperties_host \\hilltopTest02\Data\WaterUse\replication_wa -FileServer_wa_properties_typeProperties_userId SVC-Waterdata-az-df@internal.ecan.govt.nz'
+
+    # Provision Resources within Resource Group
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: 'Provision Resources'
+      condition: eq(variables['Build.SourceBranchName'], 'test')
+      inputs:
+        azureResourceManagerConnection: '$(azure-resource-manager-connection)'
+        subscriptionId: '$(deployment-subscription-Id)'
+        resourceGroupName: '$(target-resource-group)'
+        location: '$(deployment-location)'
+        csmFile: '$(Build.Repository.LocalPath)\infrastructure_ADF_manual_development\arm_template.json'
+        csmParametersFile: '$(Build.Repository.LocalPath)\infrastructure_ADF_manual_development\arm_template_parameters.json'
+        overrideParameters: '-ConnectVIA_IR shared-test-df01 -factoryName waterdata-manual-test-df -properties_typeProperties_linkedInfo_resourceId /subscriptions/98ca4ce4-c154-4728-9962-9c8147932fc2/resourcegroups/shared-acquisition-test-rg/providers/Microsoft.DataFactory/factories/shared-test-df01/integrationruntimes/shared-test-iR01 -FileServer_properties_typeProperties_host \\\\hilltopTest02\\Data\\WaterQualityData\\replication -FileServer_properties_typeProperties_userId SVC-Waterdata-az-df@internal.ecan.govt.nz -AzureBlobStorage_properties_typeProperties_connectionString_secretName ADFManualQuality-Landing-Live-Link-XML-JSON -waterdatadatafactorykv_properties_typeProperties_baseUrl https://waterdata-adf-test-kv.vault.azure.net/ -FileServer_wa_properties_typeProperties_host \\\\hilltopTest02\\Data\\WaterUse\\replication_wa -FileServer_wa_properties_typeProperties_userId SVC-Waterdata-az-df@internal.ecan.govt.nz'
+
+    # Provision Resources within Resource Group
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: 'Provision Resources'
+      condition: eq(variables['Build.SourceBranchName'], 'prod')
+      inputs:
+        azureResourceManagerConnection: '$(azure-resource-manager-connection)'
+        subscriptionId: '$(deployment-subscription-Id)'
+        resourceGroupName: '$(target-resource-group)'
+        location: '$(deployment-location)'
+        csmFile: '$(Build.Repository.LocalPath)\infrastructure_ADF_manual_development\arm_template.json'
+        csmParametersFile: '$(Build.Repository.LocalPath)\infrastructure_ADF_manual_development\arm_template_parameters.json'
+        overrideParameters: '-ConnectVIA_IR shared-prod-df01 -factoryName waterdata-manual-prod-df -properties_typeProperties_linkedInfo_resourceId /subscriptions/bd97980b-a7c1-48b3-96f1-08ade25b4952/resourcegroups/shared-acquisition-prod-rg/providers/Microsoft.DataFactory/factories/shared-prod-df01/integrationruntimes/shared-prod-ir01 -FileServer_properties_typeProperties_host \\\\hilltop02\\Data\\WaterQualityData\\replication -FileServer_properties_typeProperties_userId SVC-Waterdata-az-df@internal.ecan.govt.nz -AzureBlobStorage_properties_typeProperties_connectionString_secretName ADFManualQuality-Landing-Live-Link-XML-JSON -waterdatadatafactorykv_properties_typeProperties_baseUrl https://waterdata-adf-prod-kv.vault.azure.net/ -FileServer_wa_properties_typeProperties_host \\\\hilltop02\\Data\\WaterUse\\replication_wa -FileServer_wa_properties_typeProperties_userId SVC-Waterdata-az-df@internal.ecan.govt.nz'
