@@ -1,5 +1,5 @@
 {
-	"name": "Binary_Input",
+	"name": "Binary_Output",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_aaaaAzureBlobStorage1",
@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "aaInput.xlsx",
+				"fileName": "aaOut1",
 				"folderPath": "piyush-testing",
 				"container": "raw"
 			}
