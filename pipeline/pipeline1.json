@@ -73,7 +73,7 @@
 				}
 			},
 			{
-				"name": "aaaaCopy data1",
+				"name": "abcdefCopy data1",
 				"type": "Copy",
 				"dependsOn": [
 					{
