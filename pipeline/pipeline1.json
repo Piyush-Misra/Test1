@@ -125,7 +125,7 @@
 			}
 		],
 		"parameters": {
-			"bbParam": {
+			"bbParambb": {
 				"type": "string",
 				"defaultValue": "'parameter bbgg'"
 			}
